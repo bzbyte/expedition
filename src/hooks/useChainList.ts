@@ -8,9 +8,14 @@ import React from "react";
 export default function() {
   const [chains, setChains] = React.useState<Chain[]>([
     {
-      name: "𝚲ppVika (Mountain View)",
+      name: "𝚲ppVika (Mountain View) on z13",
       network: "demonet",
-      rpc: ["http://[2a00:fb01:400:42:5000:2fff:feff:d762]:8545"],
+      rpc: ["http://[2a00:fb01:400:42:5000:89ff:fe2d:8a37]:8545"],
+    },
+    {
+      name: "𝚲ppVika (Mountain View) on BobCat",
+      network: "demonet",
+      rpc: ["http://[2a00:fb01:400:43:5000:49ff:fec7:adae]:8545"],
     },
     {
       name: "𝚲ppVika (localhost)",
