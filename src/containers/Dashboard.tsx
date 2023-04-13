@@ -3,7 +3,7 @@ import useEthRPCStore from "../stores/useEthRPCStore";
 import * as React from "react";
 import { weiToGwei } from "../components/formatters";
 import HashRate from "../components/HashRate";
-import getBlocks, { useBlockNumber } from "../helpers";
+import getBlocks, { useBlockNumber, useGroupPublicKey } from "../helpers";
 import useInterval from "use-interval";
 import { useTheme } from "@material-ui/styles";
 import getTheme from "../themes/victoryTheme";
@@ -14,6 +14,8 @@ import { useTranslation } from "react-i18next";
 import { ArrowForwardIos } from "@material-ui/icons";
 import StatCharts from "../components/StatCharts";
 import { Block as IBlock, IsSyncingResult as ISyncing} from "@etclabscore/ethereum-json-rpc";
+import type * as CSS from 'csstype';
+import { CopyToClipboard } from "react-copy-to-clipboard";
 
 const useState = React.useState;
 
@@ -29,12 +31,17 @@ export default (props: any) => {
   const theme = useTheme<Theme>();
   const victoryTheme = getTheme(theme);
   const [blockNumber] = useBlockNumber(erpc);
+  const [groupPublicKey] = useGroupPublicKey(erpc);
   const [chainId, setChainId] = useState<string>();
   const [block, setBlock] = useState<IBlock>();
   const [blocks, setBlocks] = useState<IBlock[]>();
   const [gasPrice, setGasPrice] = useState<string>();
   const [syncing, setSyncing] = useState<ISyncing>();
   const [peerCount, setPeerCount] = useState<string>();
+
+  const groupPublicKeyStyle: CSS.Properties = {
+    overflowWrap: 'break-word' 
+  };
 
   const { t } = useTranslation();
 
@@ -133,6 +140,20 @@ export default (props: any) => {
         </Grid>
       </Grid>
       <StatCharts victoryTheme={victoryTheme} blocks={blocks} />
+
+      <Grid spacing={3} direction="column">
+         <ChartCard title={t("Group Public key")}>
+            <Typography variant="subtitle2">
+              <div style={groupPublicKeyStyle}>
+              {groupPublicKey}
+              <CopyToClipboard text={groupPublicKey}>
+                <Button variant="outlined" size="small">copy to clipboard</Button>
+              </CopyToClipboard>
+              </div>
+            </Typography>
+          </ChartCard>
+      </Grid>
+
       <Grid container justify="flex-end">
         <Button
           color="primary"
