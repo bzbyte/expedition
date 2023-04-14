@@ -3,7 +3,8 @@ import useEthRPCStore from "../stores/useEthRPCStore";
 import * as React from "react";
 import { weiToGwei } from "../components/formatters";
 import HashRate from "../components/HashRate";
-import getBlocks, { useBlockNumber, useGroupPublicKey } from "../helpers";
+import getBlocks, { useBlockNumber } from "../helpers";
+import { useGroupPublicKey, useStateCertificate } from "../appvikarpc";
 import useInterval from "use-interval";
 import { useTheme } from "@material-ui/styles";
 import getTheme from "../themes/victoryTheme";
@@ -13,7 +14,7 @@ import { hexToNumber } from "@etclabscore/eserialize";
 import { useTranslation } from "react-i18next";
 import { ArrowForwardIos } from "@material-ui/icons";
 import StatCharts from "../components/StatCharts";
-import { Block as IBlock, IsSyncingResult as ISyncing} from "@etclabscore/ethereum-json-rpc";
+import { Block as IBlock, IsSyncingResult as ISyncing } from "@etclabscore/ethereum-json-rpc";
 import type * as CSS from 'csstype';
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
@@ -32,6 +33,7 @@ export default (props: any) => {
   const victoryTheme = getTheme(theme);
   const [blockNumber] = useBlockNumber(erpc);
   const [groupPublicKey] = useGroupPublicKey(erpc);
+  const [stateMessage, stateSignature] = useStateCertificate(erpc);
   const [chainId, setChainId] = useState<string>();
   const [block, setBlock] = useState<IBlock>();
   const [blocks, setBlocks] = useState<IBlock[]>();
@@ -39,8 +41,8 @@ export default (props: any) => {
   const [syncing, setSyncing] = useState<ISyncing>();
   const [peerCount, setPeerCount] = useState<string>();
 
-  const groupPublicKeyStyle: CSS.Properties = {
-    overflowWrap: 'break-word' 
+  const groupCertificationStyle: CSS.Properties = {
+    overflowWrap: 'break-word'
   };
 
   const { t } = useTranslation();
@@ -93,6 +95,10 @@ export default (props: any) => {
     return <CircularProgress />;
   }
 
+  let verification_script: string = "node ./lib/esm/main.js "+
+                                    "--public_key='" + groupPublicKey + "' " +
+                                    "--signature='" +  stateSignature + "' " +
+                                    "--message='" +    stateMessage   + "' ";
   return (
     <div>
       <Grid container spacing={3} direction="column">
@@ -142,16 +148,18 @@ export default (props: any) => {
       <StatCharts victoryTheme={victoryTheme} blocks={blocks} />
 
       <Grid spacing={3} direction="column">
-         <ChartCard title={t("Group Public key")}>
-            <Typography variant="subtitle2">
-              <div style={groupPublicKeyStyle}>
-              {groupPublicKey}
-              <CopyToClipboard text={groupPublicKey}>
-                <Button variant="outlined" size="small">copy to clipboard</Button>
+        <ChartCard title={t("State Certificate")}>
+          <Typography variant="subtitle2">
+            <div style={groupCertificationStyle}>
+              <div><i>StateRoot:</i>      {stateMessage}  </div>
+              <div><i>Signature:</i>      {stateSignature}</div>
+              <div><i>PublicKey:</i> <div>{groupPublicKey}</div></div>
+              <CopyToClipboard text={verification_script}>
+                <Button variant="outlined" size="small">Copy verification script to clipboard</Button>
               </CopyToClipboard>
-              </div>
-            </Typography>
-          </ChartCard>
+            </div>
+          </Typography>
+        </ChartCard>
       </Grid>
 
       <Grid container justify="flex-end">
