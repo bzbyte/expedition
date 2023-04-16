@@ -18,9 +18,9 @@ export default {
   "Transaction Count": "Transaction Count",
   "Gas Usage": "Gas Usage",
   "Uncles": "Uncles",
-  "Top Miners": "Top Miners",
-  "Top Miners by extraData": "Top Miners by extraData",
-  "Top Miners by Address": "Top Miners by Address",
+  "Top block makers": "Top block makers",
+  "Top block makers by extraData": "Top block makers by extraData",
+  "Top block makers by Address": "Top block makers by Address",
   // block list
   "Block Number": "블록번호",
   "Hash": "해시",

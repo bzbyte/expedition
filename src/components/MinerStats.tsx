@@ -82,7 +82,7 @@ const MinerStats: React.FC<IProps> = ({blocks}) => {
         </ChartCard>
       </Grid>
       <Grid key="uncles" item xs={12} md={3} lg={3}>
-        <ChartCard title={t("Miners by extraData", { count: config.blockHistoryLength })}>
+        <ChartCard title={t("Block makers by extradata tag", { count: config.blockHistoryLength })}>
           <VictoryPie
             colorScale="cool"
             labelComponent={<CustomPieChartLabel />}
