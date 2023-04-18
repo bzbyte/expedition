@@ -19,23 +19,24 @@ function isBufferEqual(a: ArrayBuffer, b: ArrayBuffer): boolean {
 const hexRe = new RegExp(/^([0-9A-F]{2})*$/i);
 export function fromHex(hex: string): ArrayBuffer {
     if (!hexRe.test(hex)) {
-        throw new Error('Invalid hexadecimal string.');
+        throw new Error("Invalid hexadecimal string.");
     }
     const buffer = [...hex]
         .reduce((acc, curr, i) => {
             // tslint:disable-next-line:no-bitwise
-            acc[(i / 2) | 0] = (acc[(i / 2) | 0] || '') + curr;
+            acc[(i / 2) | 0] = (acc[(i / 2) | 0] || "") + curr;
             return acc;
         }, [] as string[])
-        .map(x => Number.parseInt(x, 16));
+        .map((x) => Number.parseInt(x, 16));
 
     return new Uint8Array(buffer).buffer;
 }
 
 const DER_PREFIX = fromHex(
-    '308182301d060d2b0601040182dc7c0503010201060c2b0601040182dc7c05030201036100',
+    "308182301d060d2b0601040182dc7c0503010201060c2b0601040182dc7c05030201036100",
 );
 const KEY_LENGTH = 96;
+const AVK_RPC = 37861;
 
 function extractDER(buf: ArrayBuffer): ArrayBuffer {
     const expectedLength = DER_PREFIX.byteLength + KEY_LENGTH;
@@ -52,30 +53,32 @@ function extractDER(buf: ArrayBuffer): ArrayBuffer {
 }
 
 
-async function fetchGroupPublicKey(erpc: ERPC | undefined, groupPublicKey: string, setGroupPublicKey: React.Dispatch<React.SetStateAction<string>>) {
+async function fetchGroupPublicKey(erpc: ERPC | undefined,
+                                   groupPublicKey: string,
+				   setGroupPublicKey: React.Dispatch<React.SetStateAction<string>>) {
     if (!erpc) {
         return [groupPublicKey];
     }
-    let parsedUrl = new URL(erpc.transport.uri);
-    let url = parsedUrl.protocol + "//" + parsedUrl.hostname + ":8080/api/v2/status";
-    const controller = new AbortController()
-    const signal = controller.signal
-    let timeoutId = setTimeout(() => {
+    const parsedUrl = new URL(erpc.transport.uri);
+    const url = parsedUrl.protocol + "//" + parsedUrl.hostname + ":" + AVK_RPC.toString() + "/api/v2/status";
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const timeoutId = setTimeout(() => {
         controller.abort()
     }, 5000)
-    let resp = await fetch(url, { signal }).catch(e => { return false; });
-    if (typeof resp == "boolean") {
+    const resp = await fetch(url, { signal }).catch((e) =>  false);
+    if (typeof resp === "boolean") {
         clearTimeout(timeoutId);
         setGroupPublicKey("Fetching ...");
         return;
     }
     resp
         .arrayBuffer()
-        .then(data => cbor.decodeAll(data))
-        .then(data => {
-            let root_key = extractDER(data[0].value.root_key);
+        .then((data) => cbor.decodeAll(data))
+        .then((data) => {
+            const rootKey = extractDER(data[0].value.root_key);
             clearTimeout(timeoutId);
-            setGroupPublicKey(Buffer.from(root_key).toString('hex'));
+            setGroupPublicKey(Buffer.from(rootKey).toString("hex"));
         });
 }
 
@@ -89,7 +92,7 @@ export const useGroupPublicKey = (erpc: ERPC | undefined): [string] => {
 
 
 function bytesToHex(bytes: Buffer): string {
-    let hex = [];
+    const hex = [];
     for (let i = 0; i < bytes.length; i++) {
         let current = bytes[i] < 0 ? bytes[i] + 256 : bytes[i];
         hex.push((current >>> 4).toString(16));
@@ -103,27 +106,26 @@ async function fetchStateCertificate(erpc: ERPC | undefined, stateCertificate: [
     if (!erpc) {
         return stateCertificate;
     }
-    let parsedUrl = new URL(erpc.transport.uri);
-    let url = parsedUrl.protocol + "//" + parsedUrl.hostname + ":8080/api/v2/cert_status";
-    const controller = new AbortController()
-    const signal = controller.signal
-    let timeoutId = setTimeout(() => {
-        controller.abort()
-    }, 5000)
-    let resp = await fetch(url, { signal }).catch(e => { return false; });
-    if (typeof resp == "boolean") {
+    const parsedUrl = new URL(erpc.transport.uri);
+    const url = parsedUrl.protocol + "//" + parsedUrl.hostname + ":" + AVK_RPC.toString() + "/api/v2/cert_status";
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const timeoutId = setTimeout(() => {
+        controller.abort();
+    }, 5000);
+    const resp = await fetch(url, { signal }).catch((e) => false);
+    if (typeof resp === "boolean") {
         clearTimeout(timeoutId);
         setStateCertificate(["Fetching ...", "..."]);
         return;
     }
     resp
         .arrayBuffer()
-        .then(certificate => cbor.decodeAll(certificate))
-        .then(certificate => {
-            console.log("Certificate:", certificate);
+        .then((certificate) => cbor.decodeAll(certificate))
+        .then((certificate) => {
             clearTimeout(timeoutId);
-            let msg = certificate[0].value.certificate.signed.content.hash;
-            let signature = certificate[0].value.certificate.signed.signature.signature;
+            const msg = certificate[0].value.certificate.signed.content.hash;
+            const signature = certificate[0].value.certificate.signed.signature.signature;
             setStateCertificate([bytesToHex(msg), bytesToHex(signature)]);
         });
 }

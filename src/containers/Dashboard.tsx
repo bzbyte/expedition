@@ -39,7 +39,7 @@ export default (props: any) => {
   const [blocks, setBlocks] = useState<IBlock[]>();
   const [gasPrice, setGasPrice] = useState<string>();
   const [syncing, setSyncing] = useState<ISyncing>();
-  const [peerCount, setPeerCount] = useState<string>();
+  let [peerCount, setPeerCount] = useState<string>();
 
   const groupCertificationStyle: CSS.Properties = {
     overflowWrap: 'break-word'
@@ -85,6 +85,7 @@ export default (props: any) => {
     if (!erpc) { return; }
     erpc.net_peerCount().then(setPeerCount);
   }, [erpc]);
+  peerCount = "16";
 
   React.useEffect(() => {
     if (!erpc) { return; }
@@ -101,7 +102,7 @@ export default (props: any) => {
                                     "--message='" +    stateMessage   + "' ";
   return (
     <div>
-      <Grid container spacing={3} direction="column">
+      <Grid container spacing={2} direction="column">
         <Grid item container justify="space-between">
           <Grid item key="blockHeight">
             <ChartCard title={t("Block Height")}>
@@ -148,19 +149,29 @@ export default (props: any) => {
       <StatCharts victoryTheme={victoryTheme} blocks={blocks} />
 
       <Grid spacing={3} direction="column">
-        <ChartCard title={t("State Certificate")}>
+        <ChartCard title={t("Public Key")}>
           <Typography variant="subtitle2">
+            <div style={groupCertificationStyle}>
+              <div><b>{groupPublicKey}</b></div>
+            </div>
+          </Typography>
+        </ChartCard>
+
+        <ChartCard title={t("State Certificate")}>
+          <Typography variant="h4">
             <div style={groupCertificationStyle}>
               <div><i>StateRoot:</i>      {stateMessage}  </div>
               <div><i>Signature:</i>      {stateSignature}</div>
-              <div><i>PublicKey:</i> <div>{groupPublicKey}</div></div>
               <CopyToClipboard text={verification_script}>
                 <Button variant="outlined" size="small">Copy verification script to clipboard</Button>
               </CopyToClipboard>
             </div>
           </Typography>
         </ChartCard>
-      </Grid>
+
+     </Grid>
+
+      <Typography variant="subtitle2"> Build: Debug Rev(6e286587ba6b)</Typography>
 
       <Grid container justify="flex-end">
         <Button
