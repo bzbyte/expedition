@@ -85,7 +85,6 @@ export default (props: any) => {
     if (!erpc) { return; }
     erpc.net_peerCount().then(setPeerCount);
   }, [erpc]);
-  peerCount = "16";
 
   React.useEffect(() => {
     if (!erpc) { return; }
@@ -158,7 +157,7 @@ export default (props: any) => {
         </ChartCard>
 
         <ChartCard title={t("State Certificate")}>
-          <Typography variant="h4">
+          <Typography variant="subtitle2">
             <div style={groupCertificationStyle}>
               <div><i>StateRoot:</i>      {stateMessage}  </div>
               <div><i>Signature:</i>      {stateSignature}</div>

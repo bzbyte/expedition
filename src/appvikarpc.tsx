@@ -36,7 +36,7 @@ const DER_PREFIX = fromHex(
     "308182301d060d2b0601040182dc7c0503010201060c2b0601040182dc7c05030201036100",
 );
 const KEY_LENGTH = 96;
-const AVK_RPC = 37861;
+const AVK_RPC_PORT = 8080;
 
 function extractDER(buf: ArrayBuffer): ArrayBuffer {
     const expectedLength = DER_PREFIX.byteLength + KEY_LENGTH;
@@ -59,13 +59,19 @@ async function fetchGroupPublicKey(erpc: ERPC | undefined,
     if (!erpc) {
         return [groupPublicKey];
     }
+    let port: string = "";
+    if (process.env.REACT_AVK_RPC_PORT === undefined) {
+        port = AVK_RPC_PORT.toString();
+    } else {
+        port = process.env.REACT_AVK_RPC_PORT;
+    }
     const parsedUrl = new URL(erpc.transport.uri);
-    const url = parsedUrl.protocol + "//" + parsedUrl.hostname + ":" + AVK_RPC.toString() + "/api/v2/status";
+    const url = parsedUrl.protocol + "//" + parsedUrl.hostname + ":" + port + "/api/v2/status";
     const controller = new AbortController();
     const signal = controller.signal;
     const timeoutId = setTimeout(() => {
-        controller.abort()
-    }, 5000)
+        controller.abort();
+    }, 5000);
     const resp = await fetch(url, { signal }).catch((e) =>  false);
     if (typeof resp === "boolean") {
         clearTimeout(timeoutId);
@@ -90,7 +96,6 @@ export const useGroupPublicKey = (erpc: ERPC | undefined): [string] => {
     return [groupPublicKey];
 };
 
-
 function bytesToHex(bytes: Buffer): string {
     const hex = [];
     for (let i = 0; i < bytes.length; i++) {
@@ -107,7 +112,13 @@ async function fetchStateCertificate(erpc: ERPC | undefined, stateCertificate: [
         return stateCertificate;
     }
     const parsedUrl = new URL(erpc.transport.uri);
-    const url = parsedUrl.protocol + "//" + parsedUrl.hostname + ":" + AVK_RPC.toString() + "/api/v2/cert_status";
+    let port: string = "";
+    if (process.env.REACT_AVK_RPC_PORT === undefined) {
+        port = AVK_RPC_PORT.toString();
+    } else {
+        port = process.env.REACT_AVK_RPC_PORT;
+    }
+    const url = parsedUrl.protocol + "//" + parsedUrl.hostname + ":" + port + "/api/v2/cert_status";
     const controller = new AbortController();
     const signal = controller.signal;
     const timeoutId = setTimeout(() => {
