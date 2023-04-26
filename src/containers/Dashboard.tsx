@@ -95,6 +95,7 @@ export default (props: any) => {
     return <CircularProgress />;
   }
 
+  peerCount = "4";
   let verification_script: string = "node ./lib/esm/main.js "+
                                     "--public_key='" + groupPublicKey + "' " +
                                     "--signature='" +  stateSignature + "' " +

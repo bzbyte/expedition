@@ -21,7 +21,7 @@ export const useBlockNumber = (erpc: ERPC | undefined): [number] => {
     erpc.eth_blockNumber().then((bn: string) => {
       setBlockNumber(hexToNumber(bn));
     });
-  }, 7000, true);
+  }, 1000, true);
   React.useEffect(() => {
     if (erpc) {
       erpc.eth_blockNumber().then((bn: string) => {
