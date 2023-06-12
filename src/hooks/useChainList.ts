@@ -18,6 +18,11 @@ export default function() {
       rpc: ["http://[2a00:fb01:400:43:5000:49ff:fec7:adae]:8545"],
     },
     {
+      name: "𝚲ppVika (Mountain View) on BobCat-1",
+      network: "demonet",
+      rpc: ["http://[2a00:fb01:400:43:5000:47ff:fe5f:c187]:8545"],
+    },
+    {
       name: "𝚲ppVika (Palo Alto) on testnet",
       network: "testnet",
       rpc: ["http://localhost:8545"],
