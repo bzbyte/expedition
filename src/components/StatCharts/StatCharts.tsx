@@ -49,7 +49,7 @@ function CalculatePrice(block: any, blocks: any[], base_price: number, change_fr
             return (base_price + (blocks[i].parentHash % 25));
         }
     }
-    return (base_price);
+    return (base_price + (blocks[blocks.length - 1].parentHash % 25));
 }
 
 function CalculateAggPrice(blocks: any[], base_price: number, change_frequency: number) {
