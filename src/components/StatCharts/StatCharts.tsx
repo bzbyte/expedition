@@ -41,24 +41,22 @@ const blockMapTransactionCount = (block: any) => {
     y: block.transactions.length,
   };
 };
-const blockMapBtcPrice = (block: any) => {
-  return {
-    x: hexToNumber(block.number),
-    y: 30440.0 + block.parentHash % 20,
-  };
-};
-const blockMapEthPrice = (block: any) => {
-  return {
-    x: hexToNumber(block.number),
-    y: 1890.0 + block.parentHash % 20,
-  };
-};
+
+function CalculatePrice(block: any, blocks: any[], base_price: number, change_frequency: number) {
+    let next_block = Math.ceil(block.number / change_frequency) * change_frequency;
+    for (var i = 0; i < blocks.length; i++) {
+        if (blocks[i].number == next_block) {
+            return (base_price + (blocks[i].parentHash % 25));
+        }
+    }
+    return (base_price);
+}
 
 function CalculateAggPrice(blocks: any[], base_price: number, change_frequency: number) {
     let next_block = Math.ceil(blocks[0].number / change_frequency) * change_frequency;
     for (var i = 0; i < blocks.length; i++) {
         if (blocks[i].number == next_block) {
-            return dollar(base_price + (blocks[i].parentHash % 20));
+            return dollar(base_price + (blocks[i].parentHash % 25));
         }
     }
     return dollar(base_price);
@@ -110,7 +108,14 @@ const StatCharts: React.FC<IProps> = ({ blocks, victoryTheme }) => {
           <VictoryChart height={config.chartHeight} width={config.chartWidth} theme={victoryTheme as any}>
             <VictoryAxis crossAxis standalone={false} />
             <VictoryAxis dependentAxis crossAxis domain={[30200, 30800]} standalone={false} />
-            <VictoryLine data={blocks.map(blockMapBtcPrice)} />
+            <VictoryLine data={blocks.map(
+                function f(block) {
+                  return {
+                    x: hexToNumber(block.number),
+                    y: CalculatePrice(block, blocks, 30440, 10),
+                  };
+                }
+            )}/>
           </VictoryChart>
         </ChartCard>
       </Grid>
@@ -119,7 +124,14 @@ const StatCharts: React.FC<IProps> = ({ blocks, victoryTheme }) => {
           <VictoryChart height={config.chartHeight} width={config.chartWidth} theme={victoryTheme as any}>
             <VictoryAxis crossAxis standalone={false} />
             <VictoryAxis dependentAxis crossAxis domain={[1750, 2000]} standalone={false} />
-            <VictoryLine data={blocks.map(blockMapEthPrice)} />
+            <VictoryLine data={blocks.map(
+                function f(block) {
+                  return {
+                    x: hexToNumber(block.number),
+                    y: CalculatePrice(block, blocks, 1890, 10),
+                  };
+                }
+            )}/>
           </VictoryChart>
         </ChartCard>
       </Grid>
