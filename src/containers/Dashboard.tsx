@@ -4,7 +4,7 @@ import * as React from "react";
 import { weiToGwei } from "../components/formatters";
 import HashRate from "../components/HashRate";
 import getBlocks, { useBlockNumber } from "../helpers";
-import { useGroupPublicKey, useStateCertificate } from "../appvikarpc";
+import { useGroupPublicKey, useStateCertificate, useIdentityCertificate } from "../appvikarpc";
 import useInterval from "use-interval";
 import { useTheme } from "@material-ui/styles";
 import getTheme from "../themes/victoryTheme";
@@ -34,6 +34,7 @@ export default (props: any) => {
   const [blockNumber] = useBlockNumber(erpc);
   const [groupPublicKey] = useGroupPublicKey(erpc);
   const [stateMessage, stateSignature] = useStateCertificate(erpc);
+  const [identity, identityMessage, identitySignature] = useIdentityCertificate(erpc);
   const [chainId, setChainId] = useState<string>();
   const [block, setBlock] = useState<IBlock>();
   const [blocks, setBlocks] = useState<IBlock[]>();
@@ -162,6 +163,20 @@ export default (props: any) => {
             <div style={groupCertificationStyle}>
               <div><i>StateRoot:</i>      {stateMessage}  </div>
               <div><i>Signature:</i>      {stateSignature}</div>
+              <CopyToClipboard text={verification_script}>
+                <Button variant="outlined" size="small">Copy verification script to clipboard</Button>
+              </CopyToClipboard>
+            </div>
+          </Typography>
+        </ChartCard>
+
+
+        <ChartCard title={t("Computational Clock")}>
+          <Typography variant="subtitle2">
+            <div style={groupCertificationStyle}>
+              <div><i>Identity:</i>           {identity}  </div>
+              <div><i>IdentityHash:</i>       {identityMessage}  </div>
+              <div><i>DecryptionKey:</i>      {identitySignature}</div>
               <CopyToClipboard text={verification_script}>
                 <Button variant="outlined" size="small">Copy verification script to clipboard</Button>
               </CopyToClipboard>

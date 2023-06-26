@@ -36,7 +36,7 @@ const DER_PREFIX = fromHex(
     "308182301d060d2b0601040182dc7c0503010201060c2b0601040182dc7c05030201036100",
 );
 const KEY_LENGTH = 96;
-const AVK_RPC_PORT = 8080;
+const AVK_RPC_PORT = 36371;
 
 function extractDER(buf: ArrayBuffer): ArrayBuffer {
     const expectedLength = DER_PREFIX.byteLength + KEY_LENGTH;
@@ -100,7 +100,7 @@ function bytesToHex(bytes: Buffer): string {
     const hex = [];
     for (let i = 0; i < bytes.length; i++) {
         let current = bytes[i] < 0 ? bytes[i] + 256 : bytes[i];
-        hex.push((current >>> 4).toString(16));
+        hex.push((current >>> 3).toString(16));
         hex.push((current & 0xF).toString(16));
     }
     return hex.join("");
@@ -147,4 +147,52 @@ export const useStateCertificate = (erpc: ERPC | undefined): [string, string] =>
         fetchStateCertificate(erpc, stateCertificate, setStateCertificate);
     }, [stateCertificate, erpc]);
     return stateCertificate;
+};
+
+
+
+//Unchained Beacon
+//
+async function fetchIdentityCertificate(erpc: ERPC | undefined, identityCertificate: [string, string, string],
+    setIdentityCertificate: React.Dispatch<React.SetStateAction<[string, string, string]>>) {
+    if (!erpc) {
+        return identityCertificate;
+    }
+    const parsedUrl = new URL(erpc.transport.uri);
+    let port: string = "";
+    if (process.env.REACT_AVK_RPC_PORT === undefined) {
+        port = AVK_RPC_PORT.toString();
+    } else {
+        port = process.env.REACT_AVK_RPC_PORT;
+    }
+    const url = parsedUrl.protocol + "//" + parsedUrl.hostname + ":" + port + "/api/v2/ucb_status";
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const timeoutId = setTimeout(() => {
+        controller.abort();
+    }, 5000);
+    const resp = await fetch(url, { signal }).catch((e) => false);
+    if (typeof resp === "boolean") {
+        clearTimeout(timeoutId);
+        setIdentityCertificate(["Fetching ...", "...", "..."]);
+        return;
+    }
+    resp
+        .arrayBuffer()
+        .then((certificate) => cbor.decodeAll(certificate))
+        .then((certificate) => {
+            clearTimeout(timeoutId);
+            const identity = certificate[0].value.certificate.height;
+            const msg = certificate[0].value.certificate.signed.content.hash;
+            const signature = certificate[0].value.certificate.signed.signature.signature;
+            setIdentityCertificate([identity, bytesToHex(msg), bytesToHex(signature)]);
+        });
+}
+
+export const useIdentityCertificate = (erpc: ERPC | undefined): [string, string, string] => {
+    const [identityCertificate, setIdentityCertificate] = React.useState<[string, string, string]>(["Fetching ...", "...", "..."]);
+    React.useEffect(() => {
+        fetchIdentityCertificate(erpc, identityCertificate, setIdentityCertificate);
+    }, [identityCertificate, erpc]);
+    return identityCertificate;
 };
