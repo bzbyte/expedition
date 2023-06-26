@@ -44,23 +44,29 @@ const blockMapTransactionCount = (block: any) => {
 const blockMapBtcPrice = (block: any) => {
   return {
     x: hexToNumber(block.number),
-    y: 30440.0 + Math.floor(Math. random() * (25 - 1 + 1)) + 1,
+    y: 30440.0 + block.parentHash % 20,
   };
-};
-const BtcPrice = () => {
-  let ret = 30440.0 + Math.floor(Math. random() * (25 - 1 + 1)) + 1;
-  return " [ $" +  ret.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + " ]";
 };
 const blockMapEthPrice = (block: any) => {
   return {
     x: hexToNumber(block.number),
-    y: 1890.0 + Math.floor(Math. random() * (10 - 1 + 1)) + 1,
+    y: 1890.0 + block.parentHash % 20,
   };
 };
-const EthPrice = () => {
-  let ret = 1890.0 + Math.floor(Math. random() * (10 - 1 + 1)) + 1;
-  return " [ $" +  ret.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + " ]";
-};
+
+function CalculateAggPrice(blocks: any[], base_price: number, change_frequency: number) {
+    let next_block = Math.ceil(blocks[0].number / change_frequency) * change_frequency;
+    for (var i = 0; i < blocks.length; i++) {
+        if (blocks[i].number == next_block) {
+            return dollar(base_price + (blocks[i].parentHash % 20));
+        }
+    }
+    return dollar(base_price);
+}
+
+function dollar(price: number) {
+    return " [ $" +  price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + " ]";
+}
 
 interface IProps {
   blocks: any[];
@@ -100,7 +106,7 @@ const StatCharts: React.FC<IProps> = ({ blocks, victoryTheme }) => {
         </ChartCard>
       </Grid>
       <Grid key="BtcPrice" item xs={12} md={6} lg={3}>
-        <ChartCard title={t("BTC" + BtcPrice())}>
+        <ChartCard title={t("BTC" + CalculateAggPrice(blocks, 30440, 10))}>
           <VictoryChart height={config.chartHeight} width={config.chartWidth} theme={victoryTheme as any}>
             <VictoryAxis crossAxis standalone={false} />
             <VictoryAxis dependentAxis crossAxis domain={[30200, 30800]} standalone={false} />
@@ -109,7 +115,7 @@ const StatCharts: React.FC<IProps> = ({ blocks, victoryTheme }) => {
         </ChartCard>
       </Grid>
       <Grid key="ethPrice" item xs={12} md={6} lg={3}>
-        <ChartCard title={t("ETH" + EthPrice())}>
+        <ChartCard title={t("ETH" + CalculateAggPrice(blocks, 1890, 10))}>
           <VictoryChart height={config.chartHeight} width={config.chartWidth} theme={victoryTheme as any}>
             <VictoryAxis crossAxis standalone={false} />
             <VictoryAxis dependentAxis crossAxis domain={[1750, 2000]} standalone={false} />
