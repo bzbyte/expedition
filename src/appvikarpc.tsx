@@ -36,7 +36,7 @@ const DER_PREFIX = fromHex(
     "308182301d060d2b0601040182dc7c0503010201060c2b0601040182dc7c05030201036100",
 );
 const KEY_LENGTH = 96;
-const AVK_RPC_PORT = 8080;
+const AVK_RPC_PORT = 32917
 
 function extractDER(buf: ArrayBuffer): ArrayBuffer {
     const expectedLength = DER_PREFIX.byteLength + KEY_LENGTH;
