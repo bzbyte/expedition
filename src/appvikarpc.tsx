@@ -100,7 +100,7 @@ function bytesToHex(bytes: Buffer): string {
     const hex = [];
     for (let i = 0; i < bytes.length; i++) {
         let current = bytes[i] < 0 ? bytes[i] + 256 : bytes[i];
-        hex.push((current >>> 3).toString(16));
+        hex.push((current >>> 4).toString(16));
         hex.push((current & 0xF).toString(16));
     }
     return hex.join("");
