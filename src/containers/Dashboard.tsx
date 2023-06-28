@@ -34,7 +34,7 @@ export default (props: any) => {
   const [blockNumber] = useBlockNumber(erpc);
   const [groupPublicKey] = useGroupPublicKey(erpc);
   const [stateMessage, stateSignature] = useStateCertificate(erpc);
-  const [identity, identityMessage, identitySignature] = useIdentityCertificate(erpc);
+  const [identity, _identityMessage, identitySignature] = useIdentityCertificate(erpc);
   const [chainId, setChainId] = useState<string>();
   const [block, setBlock] = useState<IBlock>();
   const [blocks, setBlocks] = useState<IBlock[]>();
@@ -171,15 +171,11 @@ export default (props: any) => {
         </ChartCard>
 
 
-        <ChartCard title={t("Computational Clock")}>
+        <ChartCard title={t("Encryption Clock")}>
           <Typography variant="subtitle2">
             <div style={groupCertificationStyle}>
-              <div><i>Identity:</i>           {identity}  </div>
-              <div><i>IdentityHash:</i>       {identityMessage}  </div>
-              <div><i>DecryptionKey:</i>      {identitySignature}</div>
-              <CopyToClipboard text={verification_script}>
-                <Button variant="outlined" size="small">Copy verification script to clipboard</Button>
-              </CopyToClipboard>
+              <div><i>ID:</i>  {identity}  </div>
+              <div><i>DecryptionKey:</i>  {identitySignature}</div>
             </div>
           </Typography>
         </ChartCard>
